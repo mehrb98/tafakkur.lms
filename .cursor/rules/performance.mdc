@@ -1,0 +1,107 @@
+# Performance Rules
+
+
+## General
+
+Performance must be considered from the beginning.
+
+
+==================================================
+DATABASE
+==================================================
+
+Avoid:
+
+- N+1 queries
+- unnecessary joins
+- inefficient queries
+
+
+Use:
+
+
+includes()
+
+preload()
+
+indexes
+
+
+==================================================
+BACKEND
+==================================================
+
+Use Redis for:
+
+
+- caching
+- sessions
+- frequently requested data
+
+
+Use Sidekiq for:
+
+
+- emails
+- reports
+- heavy processing
+
+
+Never block HTTP requests with heavy work.
+
+
+==================================================
+FRONTEND
+==================================================
+
+Optimize:
+
+
+- bundle size
+- rendering
+- images
+- API requests
+
+
+Use:
+
+
+Server Components
+
+Lazy loading
+
+Streaming
+
+Memoization when needed
+
+
+==================================================
+API
+==================================================
+
+Every collection endpoint requires:
+
+
+Pagination
+
+
+Avoid returning unnecessary data.
+
+
+==================================================
+MONITORING
+==================================================
+
+Measure:
+
+
+response time
+
+database performance
+
+errors
+
+memory usage
+
+
+Optimize based on metrics.

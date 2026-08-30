@@ -1,0 +1,162 @@
+# Backend Rules
+
+
+## Stack
+
+
+Use:
+
+- Ruby on Rails API only
+- PostgreSQL
+- Redis
+- Sidekiq
+- Devise
+- Devise JWT
+- JWT
+- Pundit
+- Versionist
+- Interactor
+- Jbuilder
+- Active Storage
+- Resend
+
+
+## Rails Principles
+
+
+Follow Rails conventions.
+
+
+Controllers must remain thin.
+
+
+Controllers handle:
+
+- authentication
+- authorization
+- params
+- rendering
+
+
+Controllers must NOT contain:
+
+- business logic
+- complex queries
+- workflows
+
+
+## Business Logic
+
+
+Use Interactors.
+
+
+Examples:
+
+
+CreateStudent
+
+UpdateGrade
+
+RecordAttendance
+
+GenerateReport
+
+
+Interactors handle:
+
+- workflows
+- transactions
+- business operations
+
+
+## Models
+
+
+Active Record models handle:
+
+- associations
+- validations
+- scopes
+
+
+Use Rails validations.
+
+
+Never create separate validator classes.
+
+
+Example:
+
+
+validates :email, presence: true
+
+
+## Authorization
+
+
+Use:
+
+Pundit
+
+
+Every protected action requires authorization.
+
+
+Example:
+
+
+authorize @student
+
+
+## API
+
+
+All APIs must be versioned.
+
+
+Format:
+
+
+/api/v1
+
+
+Use:
+
+Jbuilder
+
+
+Return consistent JSON.
+
+
+## Background Jobs
+
+
+Use:
+
+Sidekiq
+
+
+Jobs:
+
+- emails
+- reports
+- notifications
+- exports
+
+
+## Email
+
+
+Use:
+
+Resend
+
+
+Templates required for:
+
+- welcome
+- password reset
+- attendance
+- grades
+- announcements

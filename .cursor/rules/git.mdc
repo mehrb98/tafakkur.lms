@@ -1,0 +1,98 @@
+# Git Rules
+
+
+## Commit Convention
+
+Use Conventional Commits.
+
+
+Examples:
+
+
+feat:
+
+fix:
+
+refactor:
+
+docs:
+
+test:
+
+perf:
+
+ci:
+
+style:
+
+
+==================================================
+COMMITS
+==================================================
+
+Commits should be:
+
+
+- Small
+- Focused
+- Descriptive
+
+
+Avoid:
+
+
+Huge commits
+
+Mixed features
+
+Unrelated changes
+
+
+==================================================
+BRANCHES
+==================================================
+
+Use:
+
+
+feature/name
+
+bugfix/name
+
+hotfix/name
+
+
+==================================================
+PULL REQUESTS
+==================================================
+
+Every PR should contain:
+
+
+Description
+
+Changes
+
+Testing
+
+Screenshots (frontend)
+
+Migration notes
+
+
+==================================================
+CODE REVIEW
+==================================================
+
+Review:
+
+
+Architecture
+
+Security
+
+Performance
+
+Tests
+
+Maintainability

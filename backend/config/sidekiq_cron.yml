@@ -1,0 +1,4 @@
+cleanup_expired_tokens:
+  cron: "0 * * * *"
+  class: "CleanupExpiredTokensJob"
+  queue: low

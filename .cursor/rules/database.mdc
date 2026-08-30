@@ -1,0 +1,93 @@
+# Database Rules
+
+
+## Database
+
+Use:
+
+PostgreSQL
+
+
+## Multi Tenancy
+
+
+Every tenant-owned table MUST contain:
+
+
+school_id
+
+
+Tenant isolation is mandatory.
+
+
+Never trust tenant_id from frontend.
+
+
+Tenant comes from authenticated user.
+
+
+## Schema
+
+
+Use:
+
+UUID primary keys.
+
+
+Every table requires:
+
+
+created_at
+
+updated_at
+
+
+## Relationships
+
+
+Always use:
+
+foreign keys
+
+
+## Indexes
+
+
+Create indexes for:
+
+- foreign keys
+- search fields
+- filtering fields
+
+
+Use composite indexes when needed.
+
+
+## Data Integrity
+
+
+Use:
+
+- database constraints
+- unique indexes
+- validations
+
+
+## Performance
+
+
+Avoid:
+
+N+1 queries
+
+
+Use:
+
+includes()
+
+preload()
+
+eager_load()
+
+
+Optimize queries before adding cache.

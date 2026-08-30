@@ -1,0 +1,164 @@
+# Security Rules
+
+## Security Mindset
+
+Always treat security as a first-class requirement.
+
+Never optimize only for speed of implementation.
+
+Every feature must consider:
+
+- Authentication
+- Authorization
+- Data privacy
+- Tenant isolation
+- Input validation
+- Error handling
+
+
+==================================================
+OWASP PROTECTION
+==================================================
+
+Protect against:
+
+- SQL Injection
+- XSS
+- CSRF
+- Broken Authentication
+- Broken Authorization
+- Mass Assignment
+- Security Misconfiguration
+- Sensitive Data Exposure
+- Injection attacks
+
+
+==================================================
+AUTHENTICATION
+==================================================
+
+Use:
+
+- Devise
+- Devise JWT
+- JWT
+
+
+Requirements:
+
+- Access tokens
+- Refresh tokens
+- Token rotation
+- Token expiration
+- Logout everywhere
+- Session management
+
+
+Never:
+
+- Store sensitive tokens insecurely
+- Expose secrets
+- Log credentials
+
+
+==================================================
+AUTHORIZATION
+==================================================
+
+Use:
+
+Pundit
+
+
+Every resource must verify ownership.
+
+
+Example:
+
+Teacher can only modify assigned classes.
+
+Parent can only view linked children.
+
+Student can only view own data.
+
+Admin can only access own school.
+
+
+==================================================
+MULTI TENANCY SECURITY
+==================================================
+
+Tenant isolation is mandatory.
+
+
+Never trust:
+
+- school_id from frontend
+- user supplied tenant identifiers
+
+
+Tenant context must come from:
+
+authenticated user
+
+
+==================================================
+API SECURITY
+==================================================
+
+Implement:
+
+- Rate limiting
+- Secure headers
+- CORS configuration
+- CSP
+- HTTPS
+- Request validation
+
+
+==================================================
+DATABASE SECURITY
+==================================================
+
+Use:
+
+- Foreign keys
+- Constraints
+- Least privilege database users
+
+
+Never:
+
+- Expose database IDs unnecessarily
+- Return sensitive fields
+
+
+==================================================
+SECRETS
+==================================================
+
+Never commit:
+
+- API keys
+- Passwords
+- Tokens
+- Credentials
+
+
+Use:
+
+- Environment variables
+- Secret managers
+
+
+==================================================
+AUDITING
+==================================================
+
+Track sensitive actions:
+
+- Login
+- Permission changes
+- Grade changes
+- Attendance changes
+- User deletion

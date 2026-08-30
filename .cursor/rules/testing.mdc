@@ -1,0 +1,126 @@
+# Testing Rules
+
+
+## Testing Philosophy
+
+Every important feature must have tests.
+
+Tests are part of implementation, not optional.
+
+
+==================================================
+BACKEND TESTING
+==================================================
+
+Use:
+
+- RSpec
+- FactoryBot
+- Faker
+
+
+Test:
+
+
+Models
+
+- validations
+- associations
+- scopes
+
+
+Controllers
+
+- authentication
+- authorization
+- responses
+
+
+Interactors
+
+- business workflows
+- transactions
+
+
+Policies
+
+- permissions
+
+
+Jobs
+
+- execution
+- retries
+
+
+==================================================
+FRONTEND TESTING
+==================================================
+
+Use:
+
+- Jest
+- React Testing Library
+
+
+Test:
+
+- Components
+- Hooks
+- Forms
+- User interactions
+
+
+==================================================
+END TO END TESTING
+==================================================
+
+Use:
+
+Playwright
+
+
+Critical flows:
+
+
+Authentication
+
+- Login
+- Logout
+- Password reset
+
+
+Admin:
+
+- Create student
+- Create teacher
+
+
+Teacher:
+
+- Add grade
+- Mark attendance
+
+
+Parent:
+
+- View child progress
+
+
+Student:
+
+- View grades
+
+
+==================================================
+TEST QUALITY
+==================================================
+
+Avoid testing implementation details.
+
+
+Prefer testing:
+
+- User behavior
+- Business requirements
+- Expected results

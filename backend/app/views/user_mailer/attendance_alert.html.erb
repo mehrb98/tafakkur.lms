@@ -1,0 +1,7 @@
+<h1>Absence notification</h1>
+<p>Dear <%= @parent_user.first_name %>,</p>
+<p><strong><%= @student.user.full_name %></strong> was marked <strong><%= @record.status %></strong> on <%= @record.date %>.</p>
+<% if @record.note.present? %>
+<p>Teacher's note: <%= @record.note %></p>
+<% end %>
+<p>Please contact the school if this absence was unexpected.</p>

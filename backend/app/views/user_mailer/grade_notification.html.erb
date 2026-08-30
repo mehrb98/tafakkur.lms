@@ -1,0 +1,7 @@
+<h1>New grade posted</h1>
+<p>Hello <%= @recipient.first_name %>,</p>
+<p>A <strong><%= @grade.grade_type %></strong> grade was posted for <strong><%= @student.user.full_name %></strong> in <strong><%= @grade.subject.name %></strong>:</p>
+<p><strong><%= @grade.value %> / <%= @grade.max_value %></strong></p>
+<% if @grade.comment.present? %>
+<p>Teacher's comment: <%= @grade.comment %></p>
+<% end %>

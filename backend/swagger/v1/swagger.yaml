@@ -1,0 +1,801 @@
+openapi: 3.0.3
+info:
+  title: Tafakkur LMS API
+  version: v1
+  description: |
+    Multi-tenant Learning Management System REST API.
+
+    **Authentication:** Most endpoints require `Authorization: Bearer <access_token>`.
+    Refresh tokens are issued via httpOnly cookie on login.
+servers:
+  - url: /
+    description: Current host (works on :3000 local dev and :3001 Docker)
+tags:
+  - name: Health
+  - name: Auth
+  - name: School
+  - name: Academic Years
+  - name: Semesters
+  - name: Departments
+  - name: Teachers
+  - name: Students
+  - name: Parents
+  - name: Classes
+  - name: Sections
+  - name: Subjects
+  - name: Subject Assignments
+  - name: Attendance
+  - name: Grades
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness check
+      security: []
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness check (database + redis)
+      security: []
+      responses:
+        "200":
+          description: All dependencies healthy
+        "503":
+          description: One or more dependencies unavailable
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                remember_me:
+                  type: boolean
+      responses:
+        "201":
+          description: Authenticated
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token (refresh cookie required)
+      security: []
+      responses:
+        "200":
+          description: New access token issued
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current session
+      responses:
+        "204":
+          description: Logged out
+  /api/v1/auth/sessions:
+    get:
+      tags: [Auth]
+      summary: List active device sessions
+      responses:
+        "200":
+          description: Session list
+    delete:
+      tags: [Auth]
+      summary: Logout all sessions
+      responses:
+        "204":
+          description: All sessions revoked
+  /api/v1/auth/sessions/{id}:
+    delete:
+      tags: [Auth]
+      summary: Revoke a device session
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Session revoked
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/auth/password:
+    post:
+      tags: [Auth]
+      summary: Request password reset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "204":
+          description: Reset email sent if account exists
+    patch:
+      tags: [Auth]
+      summary: Reset password with token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password, password_confirmation]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                password_confirmation:
+                  type: string
+                  format: password
+      responses:
+        "204":
+          description: Password updated
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /api/v1/auth/confirmation:
+    get:
+      tags: [Auth]
+      summary: Confirm email address
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Email confirmed
+  /api/v1/school:
+    get:
+      tags: [School]
+      summary: Get current school
+      responses:
+        "200":
+          description: School details
+    patch:
+      tags: [School]
+      summary: Update current school
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Updated school
+  /api/v1/settings:
+    get:
+      tags: [School]
+      summary: Get school settings
+      responses:
+        "200":
+          description: Settings
+    patch:
+      tags: [School]
+      summary: Update school settings
+      responses:
+        "200":
+          description: Updated settings
+  /api/v1/academic_years:
+    get:
+      tags: [Academic Years]
+      summary: List academic years
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Academic Years]
+      summary: Create academic year
+      responses:
+        "201":
+          description: Created
+  /api/v1/academic_years/{id}:
+    get:
+      tags: [Academic Years]
+      summary: Show academic year
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Academic year
+    patch:
+      tags: [Academic Years]
+      summary: Update academic year
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Academic Years]
+      summary: Delete academic year
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/academic_years/{academic_year_id}/semesters:
+    get:
+      tags: [Semesters]
+      summary: List semesters for academic year
+      parameters:
+        - name: academic_year_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Semester list
+  /api/v1/semesters/{id}:
+    get:
+      tags: [Semesters]
+      summary: Show semester
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Semester
+    patch:
+      tags: [Semesters]
+      summary: Update semester
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Semesters]
+      summary: Delete semester
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/semesters:
+    post:
+      tags: [Semesters]
+      summary: Create semester
+      responses:
+        "201":
+          description: Created
+  /api/v1/departments:
+    get:
+      tags: [Departments]
+      summary: List departments
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Departments]
+      summary: Create department
+      responses:
+        "201":
+          description: Created
+  /api/v1/departments/{id}:
+    get:
+      tags: [Departments]
+      summary: Show department
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Department
+    patch:
+      tags: [Departments]
+      summary: Update department
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Departments]
+      summary: Delete department
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/teachers:
+    get:
+      tags: [Teachers]
+      summary: List teachers
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Teachers]
+      summary: Create teacher
+      responses:
+        "201":
+          description: Created
+  /api/v1/teachers/{id}:
+    get:
+      tags: [Teachers]
+      summary: Show teacher
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Teacher
+    patch:
+      tags: [Teachers]
+      summary: Update teacher
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Teachers]
+      summary: Delete teacher
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/students:
+    get:
+      tags: [Students]
+      summary: List students
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Students]
+      summary: Create student
+      responses:
+        "201":
+          description: Created
+  /api/v1/students/{id}:
+    get:
+      tags: [Students]
+      summary: Show student
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Student
+    patch:
+      tags: [Students]
+      summary: Update student
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Students]
+      summary: Delete student
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/students/{id}/enroll:
+    post:
+      tags: [Students]
+      summary: Enroll student in section
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "201":
+          description: Enrolled
+  /api/v1/parents:
+    get:
+      tags: [Parents]
+      summary: List parents
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Parents]
+      summary: Create parent
+      responses:
+        "201":
+          description: Created
+  /api/v1/parents/{id}:
+    get:
+      tags: [Parents]
+      summary: Show parent
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Parent
+    patch:
+      tags: [Parents]
+      summary: Update parent
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Parents]
+      summary: Delete parent
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/parents/{id}/link_student:
+    post:
+      tags: [Parents]
+      summary: Link parent to student
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "201":
+          description: Linked
+  /api/v1/parents/{id}/children:
+    get:
+      tags: [Parents]
+      summary: List parent's children
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Children list
+  /api/v1/classes:
+    get:
+      tags: [Classes]
+      summary: List classes
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Classes]
+      summary: Create class
+      responses:
+        "201":
+          description: Created
+  /api/v1/classes/{id}:
+    get:
+      tags: [Classes]
+      summary: Show class
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Class
+    patch:
+      tags: [Classes]
+      summary: Update class
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Classes]
+      summary: Delete class
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/classes/{class_id}/sections:
+    get:
+      tags: [Sections]
+      summary: List sections for class
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Section list
+  /api/v1/sections/{id}:
+    get:
+      tags: [Sections]
+      summary: Show section
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Section
+    patch:
+      tags: [Sections]
+      summary: Update section
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Sections]
+      summary: Delete section
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/sections:
+    post:
+      tags: [Sections]
+      summary: Create section
+      responses:
+        "201":
+          description: Created
+  /api/v1/subjects:
+    get:
+      tags: [Subjects]
+      summary: List subjects
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Subjects]
+      summary: Create subject
+      responses:
+        "201":
+          description: Created
+  /api/v1/subjects/{id}:
+    get:
+      tags: [Subjects]
+      summary: Show subject
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Subject
+    patch:
+      tags: [Subjects]
+      summary: Update subject
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Subjects]
+      summary: Delete subject
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/subject_assignments:
+    get:
+      tags: [Subject Assignments]
+      summary: List subject assignments
+      responses:
+        "200":
+          description: Assignment list
+    post:
+      tags: [Subject Assignments]
+      summary: Create subject assignment
+      responses:
+        "201":
+          description: Created
+  /api/v1/subject_assignments/{id}:
+    delete:
+      tags: [Subject Assignments]
+      summary: Remove subject assignment
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/attendance_records:
+    get:
+      tags: [Attendance]
+      summary: List attendance records
+      responses:
+        "200":
+          description: Attendance list
+  /api/v1/attendance_records/bulk:
+    post:
+      tags: [Attendance]
+      summary: Bulk record attendance
+      responses:
+        "200":
+          description: Attendance recorded
+  /api/v1/attendance_records/{id}:
+    patch:
+      tags: [Attendance]
+      summary: Update attendance record
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+  /api/v1/grades:
+    get:
+      tags: [Grades]
+      summary: List grades
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Paginated list
+    post:
+      tags: [Grades]
+      summary: Create grade
+      responses:
+        "201":
+          description: Created
+  /api/v1/grades/{id}:
+    get:
+      tags: [Grades]
+      summary: Show grade
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Grade
+    patch:
+      tags: [Grades]
+      summary: Update grade
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Grades]
+      summary: Delete grade
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "204":
+          description: Deleted
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    Search:
+      name: q
+      in: query
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+  responses:
+    Unauthorized:
+      description: Invalid or missing token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    NotFound:
+      description: Record not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"

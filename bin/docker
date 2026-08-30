@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ACTION="${1:-up}"
+shift || true
+cd "$ROOT/backend" && bin/rails "docker:${ACTION}" "$@"

@@ -1,0 +1,122 @@
+services:
+    db:
+        image: postgres:16-alpine
+        environment:
+            POSTGRES_USER: lms
+            POSTGRES_PASSWORD: lms_dev_password
+            POSTGRES_DB: lms_development
+        ports:
+            - "5433:5432"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U lms -d lms_development"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        networks:
+            - lms-network
+
+    redis:
+        image: redis:7-alpine
+        ports:
+            - "6379:6379"
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        networks:
+            - lms-network
+
+    api:
+        profiles: ["app"]
+        build:
+            context: ./backend
+            target: development
+        image: tafakkur-lms:dev
+        pull_policy: never
+        command: bundle exec rails server -b 0.0.0.0
+        volumes:
+            - ./backend:/app
+        ports:
+            - "3001:3000"
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            RAILS_ENV: development
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_USERNAME: lms
+            DB_PASSWORD: lms_dev_password
+            REDIS_URL: redis://redis:6379/0
+            JWT_SECRET: dev_jwt_secret_change_in_production
+            FRONTEND_URL: http://localhost:3000
+            RAILS_LOG_TO_STDOUT: "true"
+            RUN_DB_PREPARE: "true"
+        networks:
+            - lms-network
+
+    sidekiq:
+        profiles: ["app"]
+        build:
+            context: ./backend
+            target: development
+        image: tafakkur-lms:dev
+        pull_policy: never
+        command: bundle exec sidekiq -C config/sidekiq.yml
+        volumes:
+            - ./backend:/app
+        depends_on:
+            api:
+                condition: service_started
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            RAILS_ENV: development
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_USERNAME: lms
+            DB_PASSWORD: lms_dev_password
+            REDIS_URL: redis://redis:6379/0
+            JWT_SECRET: dev_jwt_secret_change_in_production
+            RUN_DB_PREPARE: "false"
+        networks:
+            - lms-network
+
+    frontend:
+        profiles: ["app"]
+        build:
+            context: ./frontend
+            target: development
+        image: tafakkur-lms-frontend:dev
+        pull_policy: never
+        command: npm run dev
+        volumes:
+            - ./frontend:/app
+            - /app/node_modules
+        ports:
+            - "3000:3000"
+        depends_on:
+            api:
+                condition: service_started
+        environment:
+            NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+            NEXT_PUBLIC_APP_URL: http://localhost:3000
+            BETTER_AUTH_SECRET: dev_better_auth_secret_change_in_production_32chars
+            BETTER_AUTH_URL: http://localhost:3000
+            RAILS_API_URL: http://api:3000/api/v1
+        networks:
+            - lms-network
+
+volumes:
+    pgdata:
+
+networks:
+    lms-network:
+        driver: bridge

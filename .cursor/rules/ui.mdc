@@ -1,0 +1,141 @@
+# UI Rules
+
+
+## Design System
+
+Use:
+
+- HeroUI
+- Tailwind CSS v4
+- next-themes
+
+
+==================================================
+COMPONENT RULES
+==================================================
+
+Components must be:
+
+- reusable
+- accessible
+- responsive
+- composable
+
+==================================================
+DESIGN TOKENS
+==================================================
+
+Never hardcode:
+
+colors
+spacing
+font sizes
+
+Use:
+
+semantic tokens.
+
+Example:
+
+bg-primary
+text-muted
+border-default
+
+
+==================================================
+DARK MODE
+==================================================
+
+Every component must support:
+
+Light mode
+Dark mode
+
+Use:
+next-themes
+
+Avoid:
+
+manual theme handling.
+
+
+==================================================
+ACCESSIBILITY
+==================================================
+
+Follow:
+
+WCAG AA
+
+
+Support:
+
+
+keyboard navigation
+
+screen readers
+
+proper labels
+
+focus states
+
+
+==================================================
+RESPONSIVE DESIGN
+==================================================
+
+Design mobile-first.
+
+
+Support:
+
+
+mobile
+
+tablet
+
+desktop
+
+
+==================================================
+FORMS
+==================================================
+
+Use:
+
+
+React Hook Form
+
+Zod
+
+Forms require:
+
+loading state
+error state
+success feedback
+
+
+==================================================
+NOTIFICATIONS
+==================================================
+
+Use:
+
+HeroUI Toast component
+
+import { Toast, Button, toast } from '@heroui/react';
+
+<div>
+    <Toast.Provider />
+    <Button onPress={() => toast("Simple message")}>
+    Show toast
+    </Button>
+</div>
+
+For:
+
+success messages
+
+errors
+
+warnings

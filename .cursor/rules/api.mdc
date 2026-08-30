@@ -1,0 +1,88 @@
+# API Rules
+
+
+## REST API
+
+
+Use REST principles.
+
+
+Version:
+
+
+/api/v1
+
+
+## Every Endpoint Requires
+
+
+- Authentication
+- Authorization
+- Validation
+- Documentation
+
+
+## Swagger
+
+
+All endpoints must be documented using:
+
+OpenAPI 3.1
+
+Swagger UI
+
+rswag
+
+
+Documentation includes:
+
+- parameters
+- request schema
+- response schema
+- errors
+- authentication
+
+
+## Responses
+
+
+Always provide:
+
+success responses
+
+error responses
+
+
+Use correct HTTP status codes.
+
+
+## Pagination
+
+
+All list endpoints require pagination.
+
+
+Support:
+
+- filtering
+- sorting
+- searching
+
+
+## Errors
+
+
+Use consistent format.
+
+
+Example:
+
+
+{
+ error:
+ {
+   code:"",
+   message:"",
+   details:[]
+ }
+}

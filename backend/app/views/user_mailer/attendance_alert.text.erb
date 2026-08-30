@@ -1,0 +1,10 @@
+Absence notification
+
+Dear <%= @parent_user.first_name %>,
+
+<%= @student.user.full_name %> was marked <%= @record.status %> on <%= @record.date %>.
+<% if @record.note.present? %>
+Teacher's note: <%= @record.note %>
+<% end %>
+
+Please contact the school if this absence was unexpected.

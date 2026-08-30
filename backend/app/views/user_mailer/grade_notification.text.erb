@@ -1,0 +1,10 @@
+New grade posted
+
+Hello <%= @recipient.first_name %>,
+
+A <%= @grade.grade_type %> grade was posted for <%= @student.user.full_name %> in <%= @grade.subject.name %>:
+
+<%= @grade.value %> / <%= @grade.max_value %>
+<% if @grade.comment.present? %>
+Teacher's comment: <%= @grade.comment %>
+<% end %>

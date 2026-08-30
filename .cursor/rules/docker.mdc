@@ -1,0 +1,81 @@
+# Docker Rules
+
+
+## Requirement
+
+Everything must run using Docker.
+
+
+Services:
+
+
+frontend
+
+backend
+
+postgres
+
+redis
+
+sidekiq
+
+
+==================================================
+DOCKERFILE
+==================================================
+
+Use:
+
+- Multi-stage builds
+- Minimal images
+- Production optimization
+
+
+==================================================
+DEVELOPMENT
+==================================================
+
+Docker Compose must support:
+
+
+- Hot reload
+- Local development
+- Database persistence
+- Redis persistence
+
+
+==================================================
+PRODUCTION
+==================================================
+
+Production containers must support:
+
+
+- Health checks
+- Logging
+- Environment variables
+- Security hardening
+
+
+==================================================
+NETWORKING
+==================================================
+
+Containers communicate using Docker networks.
+
+
+Never expose internal services publicly.
+
+
+==================================================
+DATABASE
+==================================================
+
+Database migrations must be automated.
+
+
+Deployment must handle:
+
+
+- migrations
+- rollback strategy

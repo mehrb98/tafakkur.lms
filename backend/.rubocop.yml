@@ -1,0 +1,91 @@
+plugins:
+    - rubocop-rails
+    - rubocop-rspec
+
+AllCops:
+    TargetRubyVersion: 3.4
+    NewCops: enable
+    Exclude:
+        - "db/schema.rb"
+        - "db/migrate/*.rb"
+        - "bin/**/*"
+        - "vendor/**/*"
+        - "tmp/**/*"
+        - "config/boot.rb"
+        - "config/environments/*.rb"
+        - "config/puma.rb"
+        - "config/initializers/devise.rb"
+
+Layout/IndentationWidth:
+    Width: 4
+
+Layout/LineLength:
+    Max: 120
+    AllowedPatterns:
+        - '\.and '
+
+Style/Documentation:
+    Enabled: false
+
+Style/StringLiterals:
+    EnforcedStyle: double_quotes
+
+Metrics/MethodLength:
+    Max: 25
+
+Metrics/AbcSize:
+    Max: 40
+
+Metrics/ClassLength:
+    Max: 150
+
+Metrics/ParameterLists:
+    Max: 6
+
+Rails/I18nLocaleTexts:
+    Enabled: false
+
+Lint/DuplicateBranch:
+    Enabled: false
+
+Rails/DynamicFindBy:
+    Enabled: false
+
+Style/SafeNavigationChainLength:
+    Max: 3
+
+Metrics/BlockLength:
+    Exclude:
+        - "spec/**/*"
+        - "config/routes.rb"
+        - "db/seeds.rb"
+
+Rails/UnknownEnv:
+    Environments:
+        - production
+        - development
+        - test
+        - staging
+
+Rails/SkipsModelValidations:
+    AllowedMethods:
+        - upsert_all
+        - update_column
+        - update_columns
+        - update_all
+        - touch
+
+Metrics/CyclomaticComplexity:
+    Max: 8
+
+RSpec/ExampleLength:
+    Max: 25
+
+RSpec/MultipleExpectations:
+    Max: 5
+
+RSpec/MultipleMemoizedHelpers:
+    Max: 12
+
+RSpec/NestedGroups:
+    Max: 5

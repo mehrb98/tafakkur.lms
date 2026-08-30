@@ -1,0 +1,29 @@
+# Git & editor
+.git
+.gitignore
+.cursor
+
+# Ruby / Rails artifacts (keep image context small)
+log/*
+tmp/*
+storage/*
+coverage/
+.byebug_history
+.bundle
+vendor/bundle
+
+# Environment (never bake secrets into images)
+.env
+.env.*
+
+# Test & CI (not needed in runtime image)
+spec/
+.rspec
+.rubocop.yml
+
+# Documentation
+README.md
+*.md
+
+# OS
+.DS_Store
