@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_000022) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -144,6 +144,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000022) do
     t.uuid "user_id", null: false
     t.index ["school_id"], name: "index_parents_on_school_id_kept", where: "(discarded_at IS NULL)"
     t.index ["user_id"], name: "index_parents_on_user_id", unique: true
+  end
+
+  create_table "qr_login_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "approved_at"
+    t.inet "approved_ip_address"
+    t.datetime "consumed_at"
+    t.datetime "created_at", null: false
+    t.string "device_name", limit: 255
+    t.datetime "expires_at", null: false
+    t.inet "ip_address"
+    t.string "poll_secret_digest", limit: 255, null: false
+    t.datetime "scanned_at"
+    t.uuid "school_id"
+    t.string "status", limit: 20, default: "pending", null: false
+    t.string "token_digest", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.text "user_agent"
+    t.uuid "user_id"
+    t.index ["expires_at"], name: "index_qr_login_requests_on_expires_at"
+    t.index ["poll_secret_digest"], name: "index_qr_login_requests_on_poll_secret_digest", unique: true
+    t.index ["school_id"], name: "index_qr_login_requests_on_school_id"
+    t.index ["token_digest"], name: "index_qr_login_requests_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_qr_login_requests_on_user_id"
   end
 
   create_table "refresh_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -378,6 +401,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000022) do
   add_foreign_key "parent_students", "students"
   add_foreign_key "parents", "schools"
   add_foreign_key "parents", "users"
+  add_foreign_key "qr_login_requests", "schools"
+  add_foreign_key "qr_login_requests", "users"
   add_foreign_key "refresh_tokens", "refresh_tokens", column: "replaced_by_id"
   add_foreign_key "refresh_tokens", "schools"
   add_foreign_key "refresh_tokens", "users"

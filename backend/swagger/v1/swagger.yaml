@@ -79,6 +79,103 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "422":
           $ref: "#/components/responses/ValidationError"
+  /api/v1/auth/qr:
+    post:
+      tags: [Auth]
+      summary: Start a QR login (browser). Show qr_token as a QR code; keep poll_secret private.
+      security: []
+      responses:
+        "201":
+          description: QR login request created (qr_token, poll_secret, expires_at, expires_in)
+  /api/v1/auth/qr/poll:
+    post:
+      tags: [Auth]
+      summary: Poll a QR login (browser). Returns status, or a session and refresh cookie once approved.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [poll_secret]
+              properties:
+                poll_secret:
+                  type: string
+      responses:
+        "200":
+          description: "Not approved yet: status is pending, scanned, declined, expired or consumed"
+        "201":
+          description: Approved; same body as login, refresh cookie set
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/auth/qr/scan:
+    post:
+      tags: [Auth]
+      summary: Scan a QR code (signed-in mobile app). Returns the requesting device for confirmation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [qr_token]
+              properties:
+                qr_token:
+                  type: string
+      responses:
+        "200":
+          description: Requesting device (device_name, ip_address, requested_at, expires_at)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /api/v1/auth/qr/approve:
+    post:
+      tags: [Auth]
+      summary: Approve a QR login (signed-in mobile app); the browser is signed in as this user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [qr_token]
+              properties:
+                qr_token:
+                  type: string
+      responses:
+        "200":
+          description: Approved
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /api/v1/auth/qr/decline:
+    post:
+      tags: [Auth]
+      summary: Decline a QR login (signed-in mobile app)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [qr_token]
+              properties:
+                qr_token:
+                  type: string
+      responses:
+        "200":
+          description: Declined
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
   /api/v1/auth/refresh:
     post:
       tags: [Auth]

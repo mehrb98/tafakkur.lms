@@ -3,9 +3,7 @@
 module Api
     module V1
         class AuthController < BaseController
-            include ActionController::Cookies
-
-            REFRESH_COOKIE = :refresh_token
+            include RefreshCookie
 
             skip_before_action :authenticate_request!,
                                only: %i[login refresh request_password_reset reset_password confirm_email]
@@ -35,7 +33,7 @@ module Api
                     user_agent: request.user_agent
                 )
                 if result.failure?
-                    cookies.delete(REFRESH_COOKIE, path: cookie_path)
+                    delete_refresh_cookie
                     return render_interactor_error(result)
                 end
 
@@ -50,13 +48,13 @@ module Api
                     raw_token: cookies[REFRESH_COOKIE],
                     access_payload: current_access_payload
                 )
-                cookies.delete(REFRESH_COOKIE, path: cookie_path)
+                delete_refresh_cookie
                 head :no_content
             end
 
             def logout_all
                 Auth::LogoutAll.call(user: current_user, access_payload: current_access_payload)
-                cookies.delete(REFRESH_COOKIE, path: cookie_path)
+                delete_refresh_cookie
                 head :no_content
             end
 
@@ -101,21 +99,6 @@ module Api
             end
 
             private
-
-            def set_refresh_cookie(raw_token, expires_at)
-                cookies[REFRESH_COOKIE] = {
-                    value: raw_token,
-                    httponly: true,
-                    secure: Rails.env.production?,
-                    same_site: :lax,
-                    path: cookie_path,
-                    expires: expires_at
-                }
-            end
-
-            def cookie_path
-                "/api/v1/auth"
-            end
 
             def current_access_payload
                 JwtService.decode(bearer_token)

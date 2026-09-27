@@ -17,6 +17,13 @@ Rails.application.routes.draw do
             patch "auth/password", to: "auth#reset_password"
             get "auth/confirmation", to: "auth#confirm_email"
 
+            # QR login (web shows a code, the mobile app approves it)
+            post "auth/qr", to: "qr_logins#create"
+            post "auth/qr/poll", to: "qr_logins#poll"
+            post "auth/qr/scan", to: "qr_logins#scan"
+            post "auth/qr/approve", to: "qr_logins#approve"
+            post "auth/qr/decline", to: "qr_logins#decline"
+
             # School & settings
             resource :school, only: %i[show update]
             resource :settings, only: %i[show update]
