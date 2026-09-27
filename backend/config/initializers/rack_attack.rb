@@ -32,6 +32,15 @@ module Rack
             req.ip if req.path == "/api/v1/auth/password" && req.post?
         end
 
+        ### QR login: creating codes and polling for approval
+        throttle("qr_login/create/ip", limit: 10, period: 1.minute) do |req|
+            req.ip if req.path == "/api/v1/auth/qr" && req.post?
+        end
+
+        throttle("qr_login/poll/ip", limit: 90, period: 1.minute) do |req|
+            req.ip if req.path == "/api/v1/auth/qr/poll" && req.post?
+        end
+
         self.throttled_responder = lambda do |_request|
             body = {
                 error: {

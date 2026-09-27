@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tafakkur_lms/main.dart';
@@ -6,8 +6,8 @@ import 'package:tafakkur_lms/main.dart';
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('demo sign-in opens the role dashboard with its sidebar', (tester) async {
-    tester.view.physicalSize = const Size(1440, 900);
+  testWidgets('demo sign-in opens the dashboard and the sidebar drawer', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -17,9 +17,12 @@ void main() {
 
     await tester.tap(find.text('Teacher'));
     await tester.pumpAndSettle();
-
     expect(find.text('Lessons today'), findsOneWidget);
+    expect(find.byTooltip('Scan QR code to sign in on the web'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Open navigation'));
+    await tester.pumpAndSettle();
     expect(find.text('My classes'), findsWidgets);
-    expect(find.text('Demo data'), findsOneWidget);
+    expect(find.text('Homework'), findsOneWidget);
   });
 }

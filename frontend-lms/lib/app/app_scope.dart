@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../core/auth/auth_controller.dart';
+import '../core/services/qr_login_service.dart';
 import '../core/services/school_service.dart';
 
 /// Hands the app-wide controllers down the tree.
 class AppScope extends InheritedWidget {
-  const AppScope({super.key, required this.auth, required this.school, required this.themeMode, required super.child});
+  const AppScope({
+    super.key,
+    required this.auth,
+    required this.school,
+    required this.qrLogin,
+    required this.themeMode,
+    required super.child,
+  });
 
   final AuthController auth;
   final SchoolService school;
+  final QrLoginService qrLogin;
   final ValueNotifier<ThemeMode> themeMode;
 
   static AppScope of(BuildContext context) {
@@ -19,5 +28,8 @@ class AppScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(AppScope oldWidget) =>
-      auth != oldWidget.auth || school != oldWidget.school || themeMode != oldWidget.themeMode;
+      auth != oldWidget.auth ||
+      school != oldWidget.school ||
+      qrLogin != oldWidget.qrLogin ||
+      themeMode != oldWidget.themeMode;
 }

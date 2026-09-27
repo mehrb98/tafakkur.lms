@@ -6,6 +6,7 @@ import 'app/router.dart';
 import 'app/theme/hero_theme.dart';
 import 'core/api/api_client.dart';
 import 'core/auth/auth_controller.dart';
+import 'core/services/qr_login_service.dart';
 import 'core/services/school_service.dart';
 
 void main() {
@@ -23,6 +24,7 @@ class _TafakkurAppState extends State<TafakkurApp> {
   final _api = ApiClient();
   late final _auth = AuthController(_api);
   late final _school = SchoolService(_api, _auth);
+  late final _qrLogin = QrLoginService(_api);
   final _themeMode = ValueNotifier(ThemeMode.system);
   late final GoRouter _router = buildRouter(_auth);
 
@@ -39,6 +41,7 @@ class _TafakkurAppState extends State<TafakkurApp> {
     return AppScope(
       auth: _auth,
       school: _school,
+      qrLogin: _qrLogin,
       themeMode: _themeMode,
       child: ValueListenableBuilder(
         valueListenable: _themeMode,

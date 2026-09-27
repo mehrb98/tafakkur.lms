@@ -10,6 +10,7 @@ import '../features/dashboard/student_dashboard.dart';
 import '../features/dashboard/teacher_dashboard.dart';
 import '../features/people/people_page.dart';
 import '../features/placeholder/coming_soon_page.dart';
+import '../features/qr_login/qr_scan_page.dart';
 import '../shell/app_shell.dart';
 
 GoRouter buildRouter(AuthController auth) {
@@ -28,6 +29,7 @@ GoRouter buildRouter(AuthController auth) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(path: '/scan', builder: (context, state) => const QrScanPage()),
       ShellRoute(
         builder: (context, state, child) => AppShell(location: state.matchedLocation, child: child),
         routes: [

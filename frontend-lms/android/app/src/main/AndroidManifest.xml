@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Scanning QR codes to sign in on the web -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
-        android:label="tafakkur_lms"
+        android:label="Tafakkur LMS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

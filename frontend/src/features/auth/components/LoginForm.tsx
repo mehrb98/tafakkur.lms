@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Alert, Button, Checkbox, FieldError, Form, Input, Label, Separator, TextField } from "@heroui/react";
+import { Alert, Button, Checkbox, FieldError, Form, Input, Label, Separator, Tabs, TextField } from "@heroui/react";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { ROLE_LABELS } from "@/lib/navigation/nav";
 import { ROLES, type Role } from "@/types/api";
 import { demoUser, login } from "../services/auth.service";
+import { QrLogin } from "./QrLogin";
 
 export function LoginForm() {
     const { signIn } = useAuth();
@@ -41,55 +42,88 @@ export function LoginForm() {
         <div className="flex flex-col gap-6">
             <div>
                 <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-                <p className="mt-1 text-sm text-muted">Sign in with your school account.</p>
+                <p className="mt-1 text-sm text-muted">Scan with the mobile app, or sign in with your school email.</p>
             </div>
 
-            {error && (
-                <Alert status="danger">
-                    <Alert.Indicator />
-                    <Alert.Content>
-                        <Alert.Description>{error}</Alert.Description>
-                    </Alert.Content>
-                </Alert>
-            )}
+            <Tabs defaultSelectedKey="qr" className="w-full">
+                <Tabs.ListContainer>
+                    <Tabs.List aria-label="Sign-in method" className="w-full">
+                        <Tabs.Tab id="qr" className="flex-1">
+                            QR code
+                            <Tabs.Indicator />
+                        </Tabs.Tab>
+                        <Tabs.Tab id="email" className="flex-1">
+                            Email
+                            <Tabs.Indicator />
+                        </Tabs.Tab>
+                    </Tabs.List>
+                </Tabs.ListContainer>
+                <Tabs.Panel id="qr" className="pt-6">
+                    <QrLogin />
+                </Tabs.Panel>
+                <Tabs.Panel id="email" className="flex flex-col gap-6 pt-6">
+                    {error && (
+                        <Alert status="danger">
+                            <Alert.Indicator />
+                            <Alert.Content>
+                                <Alert.Description>{error}</Alert.Description>
+                            </Alert.Content>
+                        </Alert>
+                    )}
 
-            <Form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-                <TextField name="email" type="email" isRequired value={email} onChange={setEmail} autoComplete="email">
-                    <Label>Email</Label>
-                    <Input placeholder="you@school.uz" />
-                    <FieldError />
-                </TextField>
-                <TextField name="password" type="password" isRequired value={password} onChange={setPassword} autoComplete="current-password">
-                    <Label>Password</Label>
-                    <Input placeholder="••••••••" />
-                    <FieldError />
-                </TextField>
-                <Checkbox isSelected={rememberMe} onChange={setRememberMe}>
-                    <Checkbox.Content>
-                        <Checkbox.Control>
-                            <Checkbox.Indicator />
-                        </Checkbox.Control>
-                        <Label>Keep me signed in</Label>
-                    </Checkbox.Content>
-                </Checkbox>
-                <Button type="submit" fullWidth isPending={isSubmitting}>
-                    {isSubmitting ? "Signing in…" : "Sign in"}
-                </Button>
-            </Form>
+                    <Form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                        <TextField
+                            name="email"
+                            type="email"
+                            isRequired
+                            value={email}
+                            onChange={setEmail}
+                            autoComplete="email"
+                        >
+                            <Label>Email</Label>
+                            <Input placeholder="you@school.uz" />
+                            <FieldError />
+                        </TextField>
+                        <TextField
+                            name="password"
+                            type="password"
+                            isRequired
+                            value={password}
+                            onChange={setPassword}
+                            autoComplete="current-password"
+                        >
+                            <Label>Password</Label>
+                            <Input placeholder="••••••••" />
+                            <FieldError />
+                        </TextField>
+                        <Checkbox isSelected={rememberMe} onChange={setRememberMe}>
+                            <Checkbox.Content>
+                                <Checkbox.Control>
+                                    <Checkbox.Indicator />
+                                </Checkbox.Control>
+                                <Label>Keep me signed in</Label>
+                            </Checkbox.Content>
+                        </Checkbox>
+                        <Button type="submit" fullWidth isPending={isSubmitting}>
+                            {isSubmitting ? "Signing in…" : "Sign in"}
+                        </Button>
+                    </Form>
 
-            <div className="flex items-center gap-3">
-                <Separator className="flex-1" />
-                <span className="text-xs text-muted">or explore with sample data</span>
-                <Separator className="flex-1" />
-            </div>
+                    <div className="flex items-center gap-3">
+                        <Separator className="flex-1" />
+                        <span className="text-xs text-muted">or explore with sample data</span>
+                        <Separator className="flex-1" />
+                    </div>
 
-            <div className="grid grid-cols-2 gap-2">
-                {ROLES.map((role) => (
-                    <Button key={role} variant="secondary" fullWidth onPress={() => enterDemo(role)}>
-                        {ROLE_LABELS[role]}
-                    </Button>
-                ))}
-            </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        {ROLES.map((role) => (
+                            <Button key={role} variant="secondary" fullWidth onPress={() => enterDemo(role)}>
+                                {ROLE_LABELS[role]}
+                            </Button>
+                        ))}
+                    </div>
+                </Tabs.Panel>
+            </Tabs>
         </div>
     );
 }

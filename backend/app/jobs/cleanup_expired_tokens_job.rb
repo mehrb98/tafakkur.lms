@@ -5,5 +5,6 @@ class CleanupExpiredTokensJob < ApplicationJob
 
     def perform
         RefreshToken.where(expires_at: ...30.days.ago).delete_all
+        QrLoginRequest.where(expires_at: ...1.day.ago).delete_all
     end
 end

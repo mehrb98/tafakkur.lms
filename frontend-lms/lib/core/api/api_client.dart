@@ -62,20 +62,28 @@ class ApiClient {
     );
   }
 
-  Future<dynamic> post(String path, [Map<String, Object?>? body]) async {
-    final response = await _http.post(_uri(path), headers: _headers(json: true), body: jsonEncode(body ?? {}));
-    return _decode(response);
+  /// POST. Pass [retry] for authenticated calls that should refresh once on 401.
+  Future<dynamic> post(String path, [Map<String, Object?>? body, bool retry = false]) {
+    return _send(
+      () => _http.post(_uri(path), headers: _headers(json: true), body: jsonEncode(body ?? {})),
+      retry: retry,
+    );
   }
 
-  Future<dynamic> get(String path, [Map<String, Object?> query = const {}]) async {
+  Future<dynamic> get(String path, [Map<String, Object?> query = const {}]) {
+    return _send(() => _http.get(_uri(path, query), headers: _headers()), retry: true);
+  }
+
+  Future<dynamic> _send(Future<http.Response> Function() request, {required bool retry}) async {
     try {
-      return _decode(await _http.get(_uri(path, query), headers: _headers()));
+      return _decode(await request());
     } on ApiException catch (error) {
-      if (error.status != 401 || !await refresh()) {
-        if (error.status == 401) onSessionExpired?.call();
+      if (!retry || error.status != 401) rethrow;
+      if (!await refresh()) {
+        onSessionExpired?.call();
         rethrow;
       }
-      return _decode(await _http.get(_uri(path, query), headers: _headers()));
+      return _decode(await request());
     }
   }
 

@@ -9,11 +9,10 @@ import '../core/navigation/nav_items.dart';
 import '../widgets/hero_widgets.dart';
 
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key, required this.role, required this.location, this.compact = false, this.onNavigate});
+  const Sidebar({super.key, required this.role, required this.location, this.onNavigate});
 
   final Role role;
   final String location;
-  final bool compact;
   final VoidCallback? onNavigate;
 
   @override
@@ -28,9 +27,8 @@ class Sidebar extends StatelessWidget {
         SizedBox(
           height: 64,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              mainAxisAlignment: compact ? MainAxisAlignment.center : MainAxisAlignment.start,
               children: [
                 Container(
                   width: 36,
@@ -38,7 +36,7 @@ class Sidebar extends StatelessWidget {
                   decoration: BoxDecoration(color: hero.accent, borderRadius: BorderRadius.circular(HeroRadius.item)),
                   child: Icon(Icons.school_rounded, size: 20, color: hero.accentForeground),
                 ),
-                if (!compact) ...[
+                ...[
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -62,25 +60,22 @@ class Sidebar extends StatelessWidget {
             children: [
               for (final section in navigation[role]!) ...[
                 if (section.title != null)
-                  compact
-                      ? const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider())
-                      : Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 16, 12, 6),
-                          child: Text(
-                            section.title!.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.8,
-                              color: hero.muted,
-                            ),
-                          ),
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 16, 12, 6),
+                    child: Text(
+                      section.title!.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.8,
+                        color: hero.muted,
+                      ),
+                    ),
+                  ),
                 for (final item in section.items)
                   _NavTile(
                     item: item,
                     isActive: active?.path == item.path,
-                    compact: compact,
                     onTap: () {
                       onNavigate?.call();
                       context.go(item.path);
@@ -94,10 +89,9 @@ class Sidebar extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
-            mainAxisAlignment: compact ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: [
               HeroAvatar(user?.initials ?? ''),
-              if (!compact) ...[
+              ...[
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -122,11 +116,10 @@ class Sidebar extends StatelessWidget {
 }
 
 class _NavTile extends StatelessWidget {
-  const _NavTile({required this.item, required this.isActive, required this.compact, required this.onTap});
+  const _NavTile({required this.item, required this.isActive, required this.onTap});
 
   final NavItem item;
   final bool isActive;
-  final bool compact;
   final VoidCallback onTap;
 
   @override
@@ -145,11 +138,10 @@ class _NavTile extends StatelessWidget {
           child: SizedBox(
             height: 40,
             child: Row(
-              mainAxisAlignment: compact ? MainAxisAlignment.center : MainAxisAlignment.start,
               children: [
-                if (!compact) const SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Icon(item.icon, size: 19, color: foreground),
-                if (!compact) ...[
+                ...[
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -165,11 +157,6 @@ class _NavTile extends StatelessWidget {
         ),
       ),
     );
-    return Semantics(
-      selected: isActive,
-      button: true,
-      label: item.label,
-      child: compact ? Tooltip(message: item.label, preferBelow: false, child: tile) : tile,
-    );
+    return Semantics(selected: isActive, button: true, label: item.label, child: tile);
   }
 }

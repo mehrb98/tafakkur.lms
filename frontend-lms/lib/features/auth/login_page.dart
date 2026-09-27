@@ -214,9 +214,16 @@ class _LoginPageState extends State<LoginPage> {
             Row(
               children: [
                 const Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('or explore with sample data', style: TextStyle(fontSize: 12, color: hero.muted)),
+                Flexible(
+                  flex: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'or explore with sample data',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: hero.muted),
+                    ),
+                  ),
                 ),
                 const Expanded(child: Divider()),
               ],
