@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+    root to: "health#show"
     get "health", to: "health#show"
     get "health/ready", to: "health#ready"
 
