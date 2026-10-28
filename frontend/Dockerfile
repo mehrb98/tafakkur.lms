@@ -9,13 +9,18 @@ EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
 FROM base AS build
-ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
-ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Baked into the client bundle at build time. Override via compose build.args.
+ARG NEXT_PUBLIC_API_URL=https://api.tafakkur.org/api/v1
+ARG NEXT_PUBLIC_APP_URL=https://lms.tafakkur.org
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+RUN if [ -z "$NEXT_PUBLIC_API_URL" ] || echo "$NEXT_PUBLIC_API_URL" | grep -qiE 'localhost|127\.0\.0\.1'; then \
+        echo "ERROR: NEXT_PUBLIC_API_URL must be a public API URL (got: '${NEXT_PUBLIC_API_URL:-empty}')" >&2; \
+        exit 1; \
+    fi
 RUN npm run build
 
 FROM base AS production
