@@ -1,0 +1,117 @@
+# Dokploy production stack
+# Domains (configure in Dokploy → Domains):
+#   api.tafakkur.org  → service: api       port: 3000
+#   lms.tafakkur.org  → service: frontend  port: 3000
+#
+# Set environment variables in the Dokploy Environment tab (see .env.dokploy.example).
+
+services:
+    db:
+        image: postgres:16-alpine
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB",
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    api:
+        build:
+            context: ./backend
+            target: production
+        restart: unless-stopped
+        expose:
+            - "3000"
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            RAILS_ENV: production
+            DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+            REDIS_URL: redis://redis:6379/0
+            SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+            JWT_SECRET: ${JWT_SECRET}
+            FRONTEND_URL: https://lms.tafakkur.org
+            RAILS_LOG_TO_STDOUT: "true"
+            RESEND_API_KEY: ${RESEND_API_KEY:-}
+            MAILER_FROM: ${MAILER_FROM:-noreply@tafakkur.org}
+        command:
+            [
+                "sh",
+                "-c",
+                "bundle exec rails db:prepare && bundle exec puma -C config/puma.rb",
+            ]
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+            interval: 30s
+            timeout: 5s
+            start_period: 60s
+            retries: 3
+
+    sidekiq:
+        build:
+            context: ./backend
+            target: production
+        restart: unless-stopped
+        command: bundle exec sidekiq -C config/sidekiq.yml
+        depends_on:
+            api:
+                condition: service_healthy
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            RAILS_ENV: production
+            DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+            REDIS_URL: redis://redis:6379/0
+            SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+            JWT_SECRET: ${JWT_SECRET}
+            FRONTEND_URL: https://lms.tafakkur.org
+            RESEND_API_KEY: ${RESEND_API_KEY:-}
+            MAILER_FROM: ${MAILER_FROM:-noreply@tafakkur.org}
+
+    frontend:
+        build:
+            context: ./frontend
+            target: production
+            args:
+                NEXT_PUBLIC_API_URL: https://api.tafakkur.org/api/v1
+                NEXT_PUBLIC_APP_URL: https://lms.tafakkur.org
+        restart: unless-stopped
+        expose:
+            - "3000"
+        depends_on:
+            api:
+                condition: service_healthy
+        environment:
+            NODE_ENV: production
+            NEXT_PUBLIC_API_URL: https://api.tafakkur.org/api/v1
+            NEXT_PUBLIC_APP_URL: https://lms.tafakkur.org
+            BETTER_AUTH_URL: https://lms.tafakkur.org
+            BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+            RAILS_API_URL: http://api:3000/api/v1
+
+volumes:
+    pgdata:
