@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -27,6 +27,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
     t.datetime "updated_at", null: false
     t.index ["school_id", "name"], name: "index_academic_years_on_school_id_and_name", unique: true
     t.index ["school_id"], name: "index_academic_years_one_current_per_school", unique: true, where: "(is_current = true)"
+  end
+
+  create_table "announcements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "author_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.datetime "published_at"
+    t.uuid "school_id", null: false
+    t.jsonb "target_ids", default: [], null: false
+    t.string "target_type", limit: 32, default: "all", null: false
+    t.string "title", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_announcements_on_author_id"
+    t.index ["school_id", "published_at"], name: "index_announcements_on_school_published", order: { published_at: :desc }, where: "(published_at IS NOT NULL)"
+    t.index ["school_id", "target_type"], name: "index_announcements_on_school_id_and_target_type"
   end
 
   create_table "attendance_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -186,6 +202,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
     t.index ["school_id"], name: "index_refresh_tokens_on_school_id"
     t.index ["token_digest"], name: "index_refresh_tokens_on_token_digest", unique: true
     t.index ["user_id", "revoked_at"], name: "index_refresh_tokens_active", where: "(revoked_at IS NULL)"
+  end
+
+  create_table "reports", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.datetime "expires_at"
+    t.string "file_url", limit: 512
+    t.jsonb "parameters", default: {}, null: false
+    t.string "report_type", limit: 64, null: false
+    t.uuid "requested_by_id", null: false
+    t.uuid "school_id", null: false
+    t.string "status", limit: 32, default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requested_by_id"], name: "index_reports_on_requested_by_id"
+    t.index ["school_id", "requested_by_id", "status"], name: "index_reports_on_school_id_and_requested_by_id_and_status"
+    t.index ["status"], name: "index_reports_on_status", where: "((status)::text = 'pending'::text)"
   end
 
   create_table "roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -376,6 +409,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
   end
 
   add_foreign_key "academic_years", "schools"
+  add_foreign_key "announcements", "schools"
+  add_foreign_key "announcements", "users", column: "author_id"
   add_foreign_key "attendance_records", "schools"
   add_foreign_key "attendance_records", "sections"
   add_foreign_key "attendance_records", "students"
@@ -406,6 +441,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
   add_foreign_key "refresh_tokens", "refresh_tokens", column: "replaced_by_id"
   add_foreign_key "refresh_tokens", "schools"
   add_foreign_key "refresh_tokens", "users"
+  add_foreign_key "reports", "schools"
+  add_foreign_key "reports", "users", column: "requested_by_id"
   add_foreign_key "roles", "schools"
   add_foreign_key "school_classes", "academic_years"
   add_foreign_key "school_classes", "departments"

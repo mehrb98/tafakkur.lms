@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'hero_colors.dart';
 
-/// HeroUI radii: `--radius` is 8px, fields use 1.5x, cards use `rounded-3xl`,
-/// buttons are pills.
 class HeroRadius {
   static const double base = 8;
   static const double field = 12;
@@ -13,7 +11,10 @@ class HeroRadius {
 }
 
 ThemeData buildHeroTheme(Brightness brightness) {
-  final hero = brightness == Brightness.light ? HeroColors.light : HeroColors.dark;
+  final hero = brightness == Brightness.light
+      ? HeroColors.light
+      : HeroColors.dark;
+
   final scheme = ColorScheme(
     brightness: brightness,
     primary: hero.accent,
@@ -34,13 +35,19 @@ ThemeData buildHeroTheme(Brightness brightness) {
     surfaceContainerHighest: hero.surfaceTertiary,
   );
 
-  final baseText = brightness == Brightness.light ? Typography.blackMountainView : Typography.whiteMountainView;
-  final textTheme = GoogleFonts.interTextTheme(baseText)
-      .apply(bodyColor: hero.foreground, displayColor: hero.foreground);
+  final baseText = brightness == Brightness.light
+      ? Typography.blackMountainView
+      : Typography.whiteMountainView;
+  final textTheme = GoogleFonts.interTextTheme(
+    baseText,
+  ).apply(bodyColor: hero.foreground, displayColor: hero.foreground);
 
   const pill = StadiumBorder();
   const buttonSize = Size(0, 40);
-  final buttonText = textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500, fontSize: 14);
+  final buttonText = textTheme.labelLarge?.copyWith(
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+  );
 
   return ThemeData(
     useMaterial3: true,
@@ -50,12 +57,18 @@ ThemeData buildHeroTheme(Brightness brightness) {
     textTheme: textTheme,
     extensions: [hero],
     splashFactory: InkSparkle.splashFactory,
-    dividerTheme: DividerThemeData(color: hero.separator, thickness: 1, space: 1),
+    dividerTheme: DividerThemeData(
+      color: hero.separator,
+      thickness: 1,
+      space: 1,
+    ),
     cardTheme: CardThemeData(
       color: hero.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(HeroRadius.card)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(HeroRadius.card),
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -77,10 +90,17 @@ ThemeData buildHeroTheme(Brightness brightness) {
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(foregroundColor: hero.accent, shape: pill, textStyle: buttonText),
+      style: TextButton.styleFrom(
+        foregroundColor: hero.accent,
+        shape: pill,
+        textStyle: buttonText,
+      ),
     ),
     iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(foregroundColor: hero.foreground, shape: pill),
+      style: IconButton.styleFrom(
+        foregroundColor: hero.foreground,
+        shape: pill,
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -88,7 +108,10 @@ ThemeData buildHeroTheme(Brightness brightness) {
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       hintStyle: TextStyle(color: hero.muted, fontSize: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(HeroRadius.field), borderSide: BorderSide.none),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(HeroRadius.field),
+        borderSide: BorderSide.none,
+      ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(HeroRadius.field),
         borderSide: brightness == Brightness.light
@@ -112,16 +135,27 @@ ThemeData buildHeroTheme(Brightness brightness) {
       decoration: BoxDecoration(
         color: hero.surface,
         borderRadius: BorderRadius.circular(HeroRadius.item),
-        boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 4))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       textStyle: TextStyle(color: hero.foreground, fontSize: 12),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: hero.surface,
       elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(HeroRadius.field + 4)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(HeroRadius.field + 4),
+      ),
     ),
     drawerTheme: DrawerThemeData(backgroundColor: hero.surface, width: 288),
-    progressIndicatorTheme: ProgressIndicatorThemeData(color: hero.accent, linearTrackColor: hero.defaultColor),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: hero.accent,
+      linearTrackColor: hero.defaultColor,
+    ),
   );
 }

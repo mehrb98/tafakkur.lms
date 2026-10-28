@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// HeroUI v3 default theme tokens, converted from the OKLCH values in
-/// `@heroui/styles/themes/default/variables.css` so the Flutter app matches
-/// the web dashboard.
 @immutable
 class HeroColors extends ThemeExtension<HeroColors> {
   const HeroColors({
@@ -121,7 +118,9 @@ class HeroColors extends ThemeExtension<HeroColors> {
   @override
   HeroColors lerp(HeroColors? other, double t) {
     if (other == null) return this;
+    
     Color l(Color a, Color b) => Color.lerp(a, b, t)!;
+    
     return HeroColors(
       background: l(background, other.background),
       foreground: l(foreground, other.foreground),

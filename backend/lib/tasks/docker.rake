@@ -46,7 +46,7 @@ namespace :docker do
         puts "Swagger → http://localhost:3001/api"
         puts "Health  → http://localhost:3001/health"
         puts "Logs    → rails docker:logs"
-        puts "Seed    → docker compose --profile app exec api bundle exec rails db:seed"
+        puts "Seed    → rails 'docker:exec[db:seed]'"
     end
 
     desc "Open a shell inside the API container"
@@ -54,11 +54,45 @@ namespace :docker do
         Lms::TasksSupport.docker_compose_app("exec", "api", "bash")
     end
 
-    desc "Run a Rails command inside the API container (e.g. rails docker:exec db:seed)"
-    task :exec do
-        cmd = ARGV[1..]
-        abort "Usage: rails docker:exec db:seed" if cmd.empty?
+    desc "Run Rails inside the API container — rails 'docker:exec[db:seed]' or DOCKER_EXEC=db:migrate rails docker:exec"
+    task :exec, [:rails_command] => :environment do |_task, args|
+        command = args.rails_command.presence || ENV["DOCKER_EXEC"].presence
+        if command.blank?
+            abort <<~MSG.strip
+                Usage:
+                  rails 'docker:exec[db:seed]'
+                  rails 'docker:exec[db:migrate]'
+                  rails 'docker:exec[db:reset]'
+                  DOCKER_EXEC=db:migrate rails docker:exec
 
+                (Plain `rails docker:exec db:seed` does not pass arguments to the task.)
+            MSG
+        end
+
+        cmd = command.split
         Lms::TasksSupport.docker_compose_app("exec", "api", "bundle", "exec", "rails", *cmd)
+    end
+
+    desc "Reset DB in Docker — stops api+sidekiq first (avoids PG::ObjectInUse on drop)"
+    task "db:reset" => :environment do
+        puts "Stopping api and sidekiq so Postgres can drop lms_development..."
+        puts "Also stop host `rails dev` if it is running (same database on :5433)."
+        Lms::TasksSupport.stop_app_containers!
+        sleep 2
+        Lms::TasksSupport.terminate_database_connections!
+        # This rake task loads :environment — disconnect so Postgres can drop the DB in Docker.
+        Lms::TasksSupport.disconnect_rails_database!
+        reset_ok = false
+        begin
+            Lms::TasksSupport.docker_rails_run!("db:reset", run_db_prepare: false)
+            reset_ok = true
+        ensure
+            if reset_ok
+                puts "Starting api and sidekiq..."
+                Lms::TasksSupport.start_app_containers!
+            else
+                puts "Reset failed — api and sidekiq left stopped. Fix the error above, then: rails docker:start"
+            end
+        end
     end
 end

@@ -57,6 +57,27 @@ module Lms
             run!("docker", "compose", "-f", compose_file.to_s, "--profile", "app", *args)
         end
 
+        def stop_app_containers!
+            return unless compose_available?
+
+            docker_compose_app("stop", "api", "sidekiq")
+        end
+
+        def start_app_containers!
+            return unless compose_available?
+
+            docker_compose_app("start", "api", "sidekiq")
+        end
+
+        # One-off API container (does not require the long-running api service).
+        def docker_rails_run!(*rails_args, run_db_prepare: true)
+            extra = run_db_prepare ? [] : ["-e", "RUN_DB_PREPARE=false"]
+            docker_compose_app(
+                "run", "--rm", "--no-deps", *extra,
+                "api", "bundle", "exec", "rails", *rails_args
+            )
+        end
+
         def start_docker_services!
             return puts("docker-compose.yml not found — skipping Docker") unless compose_available?
 
@@ -90,6 +111,28 @@ module Lms
             end
 
             warn "Redis not ready at #{redis_url} — run `rails docker:up`"
+        end
+
+        # Drop/reseed fails while Puma, Sidekiq, or db:prepare still hold connections.
+        def disconnect_rails_database!
+            return unless defined?(ActiveRecord::Base)
+
+            ActiveRecord::Base.connection_handler.clear_all_connections!(:all)
+        end
+
+        def terminate_database_connections!
+            return unless defined?(ActiveRecord::Base)
+
+            dev_db = ActiveRecord::Base.connection_db_config.database
+            test_db = ActiveRecord::Base.configurations.configs_for(env_name: "test").first&.database
+            [dev_db, test_db].compact.uniq.each do |db_name|
+                ActiveRecord::Base.connection.execute(
+                    ActiveRecord::Base.sanitize_sql_array(
+                        ["SELECT pg_terminate_backend(pid) FROM pg_stat_activity " \
+                         "WHERE datname = ? AND pid <> pg_backend_pid()", db_name]
+                    )
+                )
+            end
         end
 
         def print_dev_commands

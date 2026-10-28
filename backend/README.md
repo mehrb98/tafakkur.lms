@@ -54,7 +54,9 @@ Everything is built and runs **inside Docker**:
 ```bash
 cd backend
 rails docker:start          # build image + start db, redis, api, sidekiq
-rails docker:exec db:seed   # seed inside container
+rails 'docker:exec[db:seed]'    # seed inside container
+rails 'docker:exec[db:migrate]'
+rails docker:db:reset           # preferred — stops api/sidekiq, then reset+seed
 rails docker:logs           # watch API logs
 rails docker:shell          # bash in API container
 ```
@@ -73,7 +75,7 @@ rails setup:db
 rails dev
 ```
 
-API: http://localhost:3000/api/v1
+API: http://localhost:3001/api/v1 (Next.js uses :3000)
 
 ### Development
 
@@ -89,7 +91,7 @@ List all custom tasks: `rails -T`
 ## Procfile.dev
 
 ```
-web:    bundle exec rails server -b 0.0.0.0 -p 3000
+web:    bundle exec rails server -b 0.0.0.0 -p 3001
 worker: bundle exec sidekiq -C config/sidekiq.yml
 ```
 
@@ -99,9 +101,9 @@ Started by `rails dev`.
 
 | Service | URL |
 |---------|-----|
-| API | http://localhost:3000/api/v1 |
-| Swagger UI | http://localhost:3000/api |
-| Health | http://localhost:3000/health |
+| API | http://localhost:3001/api/v1 |
+| Swagger UI | http://localhost:3001/api |
+| Health | http://localhost:3001/health |
 | Docker API | http://localhost:3001/api/v1 (`rails docker:start`) |
 | Docker Swagger | http://localhost:3001/api |
 
@@ -118,7 +120,7 @@ Postgres runs on **port 5433** (Docker maps `5433:5432`).
 
 ## API documentation
 
-- **Swagger UI:** http://localhost:3000/api (Docker: http://localhost:3001/api)
+- **Swagger UI:** http://localhost:3001/api
 - **OpenAPI spec:** `/api/openapi/v1/swagger.yaml`
 - **Markdown reference:** [api-reference.md](../.cursor/docs/architecture/v2/api-reference.md)
 

@@ -16,7 +16,9 @@ import '../shell/app_shell.dart';
 GoRouter buildRouter(AuthController auth) {
   return GoRouter(
     initialLocation: '/login',
+    
     refreshListenable: auth,
+    
     redirect: (context, state) {
       final user = auth.user;
       final location = state.matchedLocation;
@@ -27,6 +29,7 @@ GoRouter buildRouter(AuthController auth) {
       if (Role.tryParse(section) != null && section != user.role.name) return home;
       return null;
     },
+    
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(path: '/scan', builder: (context, state) => const QrScanPage()),
