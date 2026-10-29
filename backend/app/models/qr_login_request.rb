@@ -28,11 +28,25 @@ class QrLoginRequest < ApplicationRecord
             token_digest: digest(qr_token),
             poll_secret_digest: digest(poll_secret),
             device_name: DeviceNameParser.parse(user_agent),
-            ip_address: ip_address,
-            user_agent: user_agent,
+            ip_address: normalize_ip(ip_address),
+            user_agent: user_agent.to_s.presence&.truncate(2000),
             expires_at: TTL.from_now
         )
         [record, qr_token, poll_secret]
+    end
+
+    # Cloudflare / Traefik sometimes forward values Postgres inet rejects
+    # (empty, "unknown", comma-separated lists). Store nil rather than 500.
+    def self.normalize_ip(value)
+        return value if value.is_a?(IPAddr)
+        return nil if value.blank?
+
+        candidate = value.to_s.split(",").first.to_s.strip
+        return nil if candidate.blank? || candidate.casecmp("unknown").zero?
+
+        IPAddr.new(candidate)
+    rescue IPAddr::InvalidAddressError
+        nil
     end
 
     def self.digest(raw)
@@ -75,7 +89,7 @@ class QrLoginRequest < ApplicationRecord
             user: user,
             school_id: user.school_id,
             approved_at: Time.current,
-            approved_ip_address: ip_address
+            approved_ip_address: self.class.normalize_ip(ip_address)
         )
     end
 
